@@ -17,7 +17,7 @@ Dive into the rich data of Tikur Anbessa Hosipitals from 2020 to 2024, interact,
 We Insatll All required Library such as, Dash, Streamlit, Gradio for front and back end developemnt 
 ## Save The following
 
-= Save Best perfomed model, XGBOost
+= Save Best perfomed model, XGBoost
 
 = Save Label encoder for Catagorical features 
 
