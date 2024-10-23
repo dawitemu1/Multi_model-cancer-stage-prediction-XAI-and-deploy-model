@@ -14,6 +14,14 @@ which catagory of the pacients have need spacial treatments most likely severl s
 
 Dive into the rich data of Tikur Anbessa Hosipitals from 2020 to 2024, interact, and uncover valuable insights for decision making!
 
+
+We Insatll All required Library such as, Dash, Streamlit, Gradio for front and back end developemnt 
+
+= Save Best perfomed model, XGBOost
+
+= Save Label encoder for Catagorical features 
+
+= MinMax scaler for Numerical feature 
 ## Demo
 
 https://github.com/user-attachments/assets/d47a9ade-6a5e-40d2-ba5f-0eb9dae84b3d
