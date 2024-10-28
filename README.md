@@ -1,4 +1,4 @@
-## MultiModel Cancer Stage Prediction
+## MultiModel Cancer Stage Prediction Tool
 
 Welcome to Cancer Stage prediction/ Tool!
 
