@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
+import joblib  # Ensure joblib is imported
 from sklearn.preprocessing import MinMaxScaler
 
 # Configuring the page with Title, icon, and layout
@@ -29,24 +30,44 @@ st.image("cancer.jpg", width=800)
 st.markdown('<h1 style="text-align: center;">MultiModel Cancer Stage Prediction</h1>', unsafe_allow_html=True)
 
 # Load the model, label encoders, and scalers
-model_path = "Stage_xgb_model.sav"
-loaded_model = pickle.load(open(model_path, "rb"))
-label_encoders_path = "label_encoders.pkl"
-label_encoders = pickle.load(open(label_encoders_path, "rb"))
-scalers_path = "minmax_scalers.pkl"
-minmax_scalers = pickle.load(open(scalers_path, "rb"))
+# Load the CatBoost model
+loaded_model = joblib.load('xgb_model2.pkl')
 
+# Load the label encoders
+label_encoders = joblib.load('label_encoders2.pkl')
+
+# Load the MinMax scaler parameters
+minmax_scalers = joblib.load('scaler_params2.pkl')
 # Feature names and types
 features = {
-    'Age': 'numerical', 'Sex': 'categorical', 'Occupation': 'categorical',
-    'Education_Level': 'categorical', 'Residence': 'categorical', 'Region': 'categorical',
-    'Zone': 'categorical', 'City': 'categorical', 'SubCity': 'categorical',
-    'Woreda': 'categorical', 'Kebel': 'categorical', 'Diagnosis': 'categorical',
-    'Group diagonsis': 'categorical', 'Type diagnosis': 'categorical', 'Status': 'categorical',
-    'Unit': 'categorical', 'Pacient Weight': 'categorical', 'BMI': 'categorical',
-    'Laboratory Service ': 'categorical', 'HistoryType': 'categorical', 'History value ': 'categorical',
-    'Prescrption Type': 'categorical', 'Prescribed Item': 'categorical', 'Tumor_Type': 'categorical',
-    'Price': 'numerical', 'Is Paid': 'numerical', 'Is Available': 'numerical'
+    'Age': 'numerical',
+    'Sex': 'categorical', 
+    'Occupation': 'categorical',
+    'Education_Level':   'categorical', 
+    'Residence': 'categorical', 
+    'Region': 'categorical',
+    'Zone': 'categorical', 
+    'City': 'categorical', 
+    'SubCity': 'categorical',
+    'Woreda': 'categorical',
+    'Kebel': 'categorical', 
+    'Diagnosis': 'categorical',
+    'Group diagonsis': 'categorical', 
+    'Type diagnosis': 'categorical', 
+    'Status': 'categorical',
+    'Unit': 'categorical', 
+    'Pacient Weight': 'categorical', 
+    'BMI': 'categorical',
+    'Laboratory Service ': 'categorical', 
+    'HistoryType': 'categorical', 
+    'History value ': 'categorical',
+    'Prescrption Type': 'categorical',
+    'Prescribed Item': 'categorical',
+    'Tumor_Type': 'categorical',
+    'Imagereport': 'categorical',
+    'Price': 'numerical', 
+    'Is Paid': 'numerical', 
+    'Is Available': 'numerical'
 }
 # Sidebar title
 st.sidebar.title("Input Parameters")
@@ -58,56 +79,63 @@ st.sidebar.markdown("""
 group_labels = {
     'Demographic Data': ['Age', 'Sex', 'Occupation', 'Education_Level', 'Residence', 'Region', 'Zone', 'City', 'SubCity', 'Woreda', 'Kebel'],
     'Clinical Data': ['Diagnosis', 'Group diagonsis', 'Type diagnosis', 'Status', 'Unit', 'Pacient Weight', 'BMI', 'Laboratory Service ', 'HistoryType', 'History value ', 'Prescrption Type', 'Prescribed Item', 'Tumor_Type'],
+    'Imagereport Data': ['Imagereport'],
     'Financial Data': ['Price', 'Is Paid', 'Is Available']
-}
+  }
 
 # Option for XLSX file upload
 uploaded_file = st.sidebar.file_uploader("Upload XLSX file", type=["XLSX"])
+# Initialize input dataframe
+input_df = pd.DataFrame(index=[0])
 
-# Display input sections in three columns
-demographic_col, clinical_col, financial_col = st.columns(3)
+# Define columns for Demographic, Clinical, Financial, and Image data
+demographic_col, clinical_col, financial_col, image_col = st.columns(4)
 
-# Load input data
-if uploaded_file is not None:
-    input_df = pd.read_excel(uploaded_file)
-else:
-    input_df = pd.DataFrame(index=[0])  # Create empty dataframe to store input values
+# Demographic Data Inputs
+with demographic_col:
+    st.subheader("Demographic Data")
+    for feature in group_labels['Demographic Data']:
+        widget_key = f"Demographic_{feature}"
+        if features[feature] == 'categorical':
+            input_df[feature] = st.selectbox(feature.replace('_', ' '), label_encoders[feature].classes_, key=widget_key)
+        else:
+            input_val = st.text_input(feature.replace('_', ' '), key=widget_key)
+            input_df[feature] = pd.to_numeric(input_val, errors='coerce')
 
-    # Demographic Data Inputs
-    with demographic_col:
-        st.subheader("Demographic Data")
-        for feature in group_labels['Demographic Data']:
-            widget_key = f"Demographic_{feature}"
-            label = feature.replace('_', ' ')
-            if features[feature] == 'categorical':
-                input_df[feature] = st.selectbox(label, label_encoders[feature].classes_, key=widget_key)
-            else:
-                input_val = st.text_input(label, key=widget_key)
-                input_df[feature] = pd.to_numeric(input_val, errors='coerce')
+# Clinical Data Inputs
+with clinical_col:
+    st.subheader("Clinical Data")
+    for feature in group_labels['Clinical Data']:
+        widget_key = f"Clinical_{feature}"
+        if features[feature] == 'categorical':
+            input_df[feature] = st.selectbox(feature.replace('_', ' '), label_encoders[feature].classes_, key=widget_key)
+        else:
+            input_val = st.text_input(feature.replace('_', ' '), key=widget_key)
+            input_df[feature] = pd.to_numeric(input_val, errors='coerce')
 
-    # Clinical Data Inputs
-    with clinical_col:
-        st.subheader("Clinical Data")
-        for feature in group_labels['Clinical Data']:
-            widget_key = f"Clinical_{feature}"
-            label = feature.replace('_', ' ')
-            if features[feature] == 'categorical':
-                input_df[feature] = st.selectbox(label, label_encoders[feature].classes_, key=widget_key)
-            else:
-                input_val = st.text_input(label, key=widget_key)
-                input_df[feature] = pd.to_numeric(input_val, errors='coerce')
+# Financial Data Inputs
+with financial_col:
+    st.subheader("Financial Data")
+    for feature in group_labels['Financial Data']:
+        widget_key = f"Financial_{feature}"
+        if features[feature] == 'categorical':
+            input_df[feature] = st.selectbox(feature.replace('_', ' '), label_encoders[feature].classes_, key=widget_key)
+        else:
+            input_val = st.text_input(feature.replace('_', ' '), key=widget_key)
+            input_df[feature] = pd.to_numeric(input_val, errors='coerce')
 
-    # Financial Data Inputs
-    with financial_col:
-        st.subheader("Financial Data")
-        for feature in group_labels['Financial Data']:
-            widget_key = f"Financial_{feature}"
-            label = feature.replace('_', ' ')
-            if features[feature] == 'categorical':
-                input_df[feature] = st.selectbox(label, label_encoders[feature].classes_, key=widget_key)
-            else:
-                input_val = st.text_input(label, key=widget_key)
-                input_df[feature] = pd.to_numeric(input_val, errors='coerce')
+# Image Data Inputs
+# Image Data Inputs
+with image_col:
+    st.subheader("Image Data")
+    for feature in group_labels['Imagereport Data']:  # Corrected from 'Image' to 'Imagereport Data'
+        widget_key = f"Image_{feature}"
+        if features[feature] == 'categorical':
+            input_df[feature] = st.selectbox(feature.replace('_', ' '), label_encoders[feature].classes_, key=widget_key)
+        else:
+            input_val = st.text_input(feature.replace('_', ' '), key=widget_key)
+            input_df[feature] = pd.to_numeric(input_val, errors='coerce')
+
 
 # Display the input data before encoding and normalization
 st.write("Input Data (Before Encoding and Normalization):")
@@ -142,7 +170,7 @@ if st.sidebar.button("Predict"):
 
         # Display prediction
         st.sidebar.write("Prediction:", Stage[prediction_index])
-        st.subheader('Prediction (Cancer Stage)')
+        st.subheader('Prediction (In which Stage is Cancer?)')
         st.write(f"Stage: {Stage[prediction_index]}")
 
         if hasattr(loaded_model, 'predict_proba'):
