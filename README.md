@@ -24,4 +24,7 @@ We Insatll All required Library such as, Dash, Streamlit, Gradio for front and b
 = MinMax scaler for Numerical feature 
 ## Demo
 
-https://github.com/user-attachments/assets/d47a9ade-6a5e-40d2-ba5f-0eb9dae84b3d
+
+https://github.com/user-attachments/assets/4e75e784-fed2-4e4b-a614-5acd424685ac
+
+
