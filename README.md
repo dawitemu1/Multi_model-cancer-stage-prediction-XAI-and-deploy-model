@@ -96,6 +96,8 @@ map_data = ethiopia_map.merge(df, left_on='Region', right_on='Region', how='left
 map_data.plot(column='Stage', legend=True, cmap='OrRd', figsize=(10,10))
 plt.title('Distribution of Cancer Stages Across Ethiopia')
 plt.show()
+
+
 <img width="975" height="794" alt="image" src="https://github.com/user-attachments/assets/d819689f-fef5-4562-9b84-9aac14f295cb" />
 
 
