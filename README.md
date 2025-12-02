@@ -54,9 +54,13 @@ The dataset consists of patient records from Tikur Anbessa Hospital (2020–2024
    cd Multi_model-cancer-stage-prediction-XAI-and-deploy-model
 ## Create a virtual environment (recommended):
 python -m venv venv
+
 source venv/bin/activate   # Linux/Mac
+
 venv\Scripts\activate      # Windows
+
 ### Install dependencies:
+
 pip install -r requirements.txt
 
 
