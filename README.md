@@ -77,6 +77,9 @@ This repository includes functionality to visualize the spatial distribution of 
 4. **Visualization**  
    - Generate maps displaying the distribution of cancer stages across regions, helping identify regional patterns and hotspots.
 
+<img width="975" height="794" alt="image" src="https://github.com/user-attachments/assets/4ef643f5-01a1-47e7-b99e-ff2b1d8b8a92" />
+
+
 ### Example (Python)
 ```python
 import geopandas as gpd
@@ -98,7 +101,6 @@ plt.title('Distribution of Cancer Stages Across Ethiopia')
 plt.show()
 
 
-<img width="975" height="794" alt="image" src="https://github.com/user-attachments/assets/d819689f-fef5-4562-9b84-9aac14f295cb" />
 
 
 
