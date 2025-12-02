@@ -63,4 +63,40 @@ venv\Scripts\activate      # Windows
 
 pip install -r requirements.txt
 
+## Cancer Stage Mapping in Ethiopia
+
+This repository includes functionality to visualize the spatial distribution of cancer stages across Ethiopia.
+
+### Workflow
+1. **Shapefile Loading**  
+   - Read the Ethiopian administrative regions shapefile using `geopandas`.
+2. **Data Integration**  
+   - Merge patient records containing cancer stage and region information with the shapefile.
+3. **Geolocation of Cancer Stages**  
+   - Assign each patient’s stage to the corresponding region.
+4. **Visualization**  
+   - Generate maps displaying the distribution of cancer stages across regions, helping identify regional patterns and hotspots.
+
+### Example (Python)
+```python
+import geopandas as gpd
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load Ethiopian regions shapefile
+ethiopia_map = gpd.read_file('data/Ethiopia_regions.shp')
+
+# Load patient data
+df = pd.read_csv('data/patient_records.csv')
+
+# Merge shapefile with cancer stage data
+map_data = ethiopia_map.merge(df, left_on='Region', right_on='Region', how='left')
+
+# Plot cancer stage distribution
+map_data.plot(column='Stage', legend=True, cmap='OrRd', figsize=(10,10))
+plt.title('Distribution of Cancer Stages Across Ethiopia')
+plt.show()
+<img width="975" height="794" alt="image" src="https://github.com/user-attachments/assets/d819689f-fef5-4562-9b84-9aac14f295cb" />
+
+
 
