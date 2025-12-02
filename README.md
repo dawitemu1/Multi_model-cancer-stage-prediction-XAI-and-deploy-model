@@ -83,22 +83,93 @@ This repository includes functionality to visualize the spatial distribution of 
 ### Example (Python)
 ```python
 import geopandas as gpd
-import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+from shapely.geometry import Point
 
-# Load Ethiopian regions shapefile
-ethiopia_map = gpd.read_file('data/Ethiopia_regions.shp')
+# -------------------------------
+# 1) Cancer stage colors
+# -------------------------------
+stage_colors = {
+    'stage1': 'green',
+    'stage2': 'orange',
+    'stage3': 'blue',
+    'stage4': 'red'
+}
 
-# Load patient data
-df = pd.read_csv('data/patient_records.csv')
+# -------------------------------
+# 2) Load shapefile
+# -------------------------------
+shp_path = r"C:\Users\Daveee\Downloads\Regions-old\Regions-old\Regions-old.shp"
+ethiopia = gpd.read_file(shp_path)
+ethiopia = ethiopia[ethiopia.is_valid & ~ethiopia.is_empty]
 
-# Merge shapefile with cancer stage data
-map_data = ethiopia_map.merge(df, left_on='Region', right_on='Region', how='left')
+# -------------------------------
+# 3) Build region polygon mapping
+# -------------------------------
+region_polygons = {row['NAME_1']: row['geometry'] for _, row in ethiopia.iterrows()}
 
-# Plot cancer stage distribution
-map_data.plot(column='Stage', legend=True, cmap='OrRd', figsize=(10,10))
-plt.title('Distribution of Cancer Stages Across Ethiopia')
+# -------------------------------
+# 4) Function to generate random point inside polygon
+# -------------------------------
+def random_point_within(poly):
+    minx, miny, maxx, maxy = poly.bounds
+    while True:
+        x = np.random.uniform(minx, maxx)
+        y = np.random.uniform(miny, maxy)
+        p = Point(x, y)
+        if poly.contains(p):
+            return x, y
+
+# -------------------------------
+# 5) Interactive plot with very small scatter
+# -------------------------------
+# For Jupyter notebook: enable interactive backend
+# %matplotlib notebook  # Uncomment if using Jupyter
+
+fig, ax = plt.subplots(figsize=(12, 12))
+ethiopia.plot(ax=ax, color='whitesmoke', edgecolor='black', linewidth=0.5)
+
+for idx, row in df.iterrows():
+    region = row['Region']
+    stage = row['Stage']
+
+    if region not in region_polygons:
+        continue
+
+    poly = region_polygons[region]
+    lon, lat = random_point_within(poly)
+
+    ax.scatter(
+        lon, lat,
+        color=stage_colors.get(stage, 'black'),
+        s=1,       # VERY SMALL point
+        alpha=0.3,
+        zorder=5
+    )
+
+# -------------------------------
+# 6) Legend and labels
+# -------------------------------
+stage_handles = [
+    plt.Line2D([], [], marker='o', color=color, label=stage, markersize=6)
+    for stage, color in stage_colors.items()
+]
+plt.legend(handles=stage_handles, title='Cancer Stage', fontsize=10)
+plt.title("Cancer Stage Distribution Across Ethiopia (Interactive Zoomable)", fontsize=16)
+plt.xlabel("Longitude")
+plt.ylabel("Latitude")
+
+# Optional: region labels at centroid
+for region, poly in region_polygons.items():
+    centroid = poly.centroid
+    ax.text(centroid.x, centroid.y, region, fontsize=6, ha='center', va='center', alpha=0.7)
+
+plt.tight_layout()
+
+# Enable interactive navigation (zoom/pan)
 plt.show()
+
 
 
 
